@@ -45,7 +45,6 @@ print("\033[34m" + str(emails))
 print("\033[0m" +"starting...")
 
 
-char_list = ["^","%","$","#","@","!"]
 fake = Faker()
 options = Options()
 options.headless = False
@@ -53,23 +52,21 @@ driver = webdriver.Chrome(options=options)
 driver.get(url)
 html = driver.page_source
 soup = BeautifulSoup(html, 'html.parser')
-form = soup.find("form")
 
 print("this programm will run untill you interrupt it. (ctrl+c)")
 try:
     while True:
         for inpt in soup.find_all('input'):
-            if inpt.get('type') == 'password':
-                password = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.XPATH, "//input[@class='%s'][@type='password']" % inpt.get('class')[0])))
-                password1 = fake.password(length=random.randint(6, 20))
-                password.clear()
-                password.send_keys(password1)
-            else:
-                choice = random.choice(char_list)
-                username = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.XPATH, "//input[@class='%s']" % inpt.get('class')[0])))
+            if inpt.get('type') == 'text' or inpt.get('type') == 'email':
+                username = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.XPATH, "//input[@type='%s'][@id='%s']" % (inpt.get('type'), inpt.get('id')))))
                 username1 = fake.name().replace(" ", "") + random.choice(emails)
                 username.clear()
                 username.send_keys(username1)
+            elif inpt.get('type') == 'password':
+                password = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.XPATH, "//input[@type='password'][@id='%s']" % inpt.get('id'))))
+                password1 = fake.password(length=random.randint(6, 20))
+                password.clear()
+                password.send_keys(password1)
         password.submit()
         print("Sent Username: {} Password: {}".format(username1, password1))
         if timeout:
